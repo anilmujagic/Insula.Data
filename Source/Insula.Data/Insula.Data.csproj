@@ -36,6 +36,7 @@
       <HintPath>..\packages\Insula.Common.1.0.3\lib\portable-win+net40+sl40+wp\Insula.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +48,12 @@
     <Compile Include="..\MasterAssemblyInfo.cs">
       <Link>Properties\MasterAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DatabaseServices\ColumnInfo.cs" />
+    <Compile Include="DatabaseServices\DatabaseSchemaInfo.cs" />
+    <Compile Include="DatabaseServices\TableInfo.cs" />
+    <Compile Include="Orm\ColumnMetadata.cs" />
+    <Compile Include="Orm\SqlStatementException.cs" />
+    <Compile Include="Orm\TableMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
