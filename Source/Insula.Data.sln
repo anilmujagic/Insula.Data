@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{62C582
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B855B0B8-B7A1-4123-BD95-925F61406BAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insula.Data.Tests", "Insula.Data.Tests\Insula.Data.Tests.csproj", "{DA30A5E4-68C9-4846-9498-280473E8123B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,8 +30,15 @@ Global
 		{3F1786E7-5B41-4209-B2E3-0DB644E87980}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F1786E7-5B41-4209-B2E3-0DB644E87980}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F1786E7-5B41-4209-B2E3-0DB644E87980}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA30A5E4-68C9-4846-9498-280473E8123B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA30A5E4-68C9-4846-9498-280473E8123B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA30A5E4-68C9-4846-9498-280473E8123B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA30A5E4-68C9-4846-9498-280473E8123B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA30A5E4-68C9-4846-9498-280473E8123B} = {B855B0B8-B7A1-4123-BD95-925F61406BAD}
 	EndGlobalSection
 EndGlobal
