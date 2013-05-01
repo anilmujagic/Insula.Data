@@ -2,26 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Data.SqlClient;
 using System.Globalization;
 using Insula.Common;
+using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace Insula.Data.Orm
 {
     public class Database : IDisposable
     {
-        public Database(string connectionString)
+        public Database(DatabaseType databaseType, string connectionString)
         {
+            if (!Enum.IsDefined(databaseType.GetType(), databaseType))
+                throw new ArgumentException("Unknown DatabaseType.", "databaseType");
             if (connectionString.IsNullOrWhiteSpace())
                 throw new ArgumentException("Connection string must not be empty.", "connectionString");
 
+            this.DatabaseType = databaseType;
             _connectionString = connectionString;
 
             this.InitializeConnection();
         }
 
+        public readonly DatabaseType DatabaseType { get; private set; }
         private readonly string _connectionString;
-        private SqlConnection _connection;
+        private DbConnection _connection;
 
 
         #region Connection
@@ -29,7 +34,14 @@ namespace Insula.Data.Orm
         private void InitializeConnection()
         {
             if (_connection == null)
-                _connection = new SqlConnection(_connectionString);
+            {
+                switch (this.DatabaseType)
+                {
+                    case DatabaseType.SqlServer:
+                        _connection = new SqlConnection(_connectionString);
+                        break;
+                }
+            }
         }
 
         internal void OpenConnection()
@@ -59,23 +71,32 @@ namespace Insula.Data.Orm
 
         #region Commands
 
-        internal SqlCommand CreateCommand()
+        internal DbCommand CreateCommand()
         {
             this.InitializeConnection();
             return _connection.CreateCommand();
         }
 
-        internal SqlCommand CreateCommand(string sql, params object[] parameters)
+        internal DbCommand CreateCommand(string sql, params object[] sqlParameterValues)
         {
             var command = this.CreateCommand();
 
             command.CommandText = sql;
 
-            if (!parameters.IsNullOrEmpty())
+            if (!sqlParameterValues.IsNullOrEmpty())
             {
-                for (int i = 0; i < parameters.Length; i++)
+                for (int i = 0; i < sqlParameterValues.Length; i++)
                 {
-                    command.Parameters.AddWithValue("@" + i.ToString(CultureInfo.InvariantCulture), parameters[i]);
+                    DbParameter parameter = null;
+
+                    switch (this.DatabaseType)
+                    {
+                        case DatabaseType.SqlServer:
+                            parameter = new SqlParameter("@" + i.ToString(CultureInfo.InvariantCulture), sqlParameterValues[i]);
+                            break;
+                    }
+
+                    command.Parameters.Add(parameter);
                 }
             }
 
