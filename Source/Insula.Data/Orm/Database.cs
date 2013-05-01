@@ -195,6 +195,16 @@ namespace Insula.Data.Orm
         #endregion
 
 
+        #region Query
+
+        public SqlQuery<T> Query<T>(string selectStatement = null, params object[] parameters) where T : class, new()
+        {
+            return new SqlQuery<T>(this, selectStatement, parameters);
+        }
+
+        #endregion
+
+
         #region IDisposable Members
 
         public void Dispose()

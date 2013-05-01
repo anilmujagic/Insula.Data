@@ -14,7 +14,7 @@ namespace Insula.Data.Tests
         [Fact]
         public void ExecuteNonQuery_ReturnsNumberOfAffectedRecords()
         {
-            using (var db = GetDatabase())
+            using (var db = TestHelper.GetDatabase())
             {
                 var name = Guid.NewGuid().ToString();
                 var name1 = name + "_1";
@@ -26,17 +26,17 @@ namespace Insula.Data.Tests
                 var updatedCount = db.ExecuteNonQuery(@"UPDATE Author SET Name = @0 WHERE Name = @1", name3, name1);
                 var deletedCount = db.ExecuteNonQuery(@"DELETE Author WHERE Name IN (@0, @1)", name2, name3);
 
-                Assert.True(insertedCount1 == 1);
-                Assert.True(insertedCount2 == 1);
-                Assert.True(updatedCount == 1);
-                Assert.True(deletedCount == 2);
+                Assert.Equal(1, insertedCount1);
+                Assert.Equal(1, insertedCount2);
+                Assert.Equal(1, updatedCount);
+                Assert.Equal(2, deletedCount);
             }
         }
 
         [Fact]
         public void ExecuteScalar_ReturnsExpectedValue()
         {
-            using (var db = GetDatabase())
+            using (var db = TestHelper.GetDatabase())
             {
                 var name = Guid.NewGuid().ToString();
                 var name1 = name + "_1";
@@ -47,25 +47,16 @@ namespace Insula.Data.Tests
                 db.ExecuteNonQuery(@"INSERT INTO Author (Name) VALUES (@0)", name2);
                 db.ExecuteNonQuery(@"INSERT INTO Author (Name) VALUES (@0)", name3);
 
-                var count = (int)db.ExecuteScalar("SELECT COUNT(1) FROM Author WHERE Name LIKE @0", name + "%");
+                var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Author WHERE Name LIKE @0", name + "%");
                 var lastInsertedName = (string)db.ExecuteScalar(
                     "SELECT TOP 1 Name FROM Author WHERE Name LIKE @0 ORDER BY AuthorID DESC",
                     name + "%");
 
                 db.ExecuteNonQuery(@"DELETE Author WHERE Name LIKE @0", name + "%");
 
-                Assert.True(count == 3);
-                Assert.True(lastInsertedName == name3);
+                Assert.Equal(3, count);
+                Assert.Equal(name3, lastInsertedName);
             }
         }
-
-        #region Helpers
-
-        private Database GetDatabase()
-        {
-            return new Database(DatabaseType.SqlServer, ConfigurationManager.ConnectionStrings["MyAppDB"].ConnectionString);
-        }
-
-        #endregion
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Insula.Common;
 
 namespace Insula.Data.Orm
 {
@@ -46,6 +47,10 @@ namespace Insula.Data.Orm
                 .Where(c => c.IsMapped)
                 .OrderByDescending(c => c.IsPrimaryKey)
                 .ToList();
+            
+            if (this.SelectColumns.IsNullOrEmpty())
+                this.SelectColumns = this.Columns
+                    .ToList();
         }
 
         public string Name { get; private set; }

@@ -10,12 +10,14 @@ namespace Insula.Data.Orm
 {
     public class SqlQuery<T> where T : class, new()
     {
-        internal SqlQuery(Database database)
+        internal SqlQuery(Database database, string selectStatement, params object[] parameters)
         {
             if (database == null)
                 throw new ArgumentNullException("database");
 
             _database = database;
+            _customSelectStatement = selectStatement;
+            _parameters = parameters;
 
             _tableMetadata = _database.GetTableMetadata(typeof(T));
             _materializer = (Materializer<T>)_database.GetMaterializer(typeof(T));
@@ -30,15 +32,23 @@ namespace Insula.Data.Orm
         private readonly Dictionary<string, TableMetadata> _joins;
         private readonly Dictionary<string, object> _joinMaterializers;
 
+        private string _customSelectStatement;
         private string _columnNames;
         private string _where;
         private object[] _parameters;
         private string[] _orderByColumns;
+
         private long _skip;
         private long _take = -1;  //-1 means no limit
 
+
+        #region Create main SELECT statement
+
         public SqlQuery<T> Include(string propertyName)
         {
+            if (_customSelectStatement != null)
+                throw new InvalidOperationException("\"Include\" method cannot be used with custom select statement.");
+
             var property = typeof(T).GetProperty(propertyName);
             if (property == null)
                 throw new ArgumentException(
@@ -53,6 +63,8 @@ namespace Insula.Data.Orm
 
         public SqlQuery<T> Where(string whereClause, params object[] parameters)
         {
+            if (_customSelectStatement != null)
+                throw new InvalidOperationException("\"Where\" method cannot be used with custom select statement.");
             if (!_where.IsNullOrWhiteSpace())
                 throw new InvalidOperationException("WHERE clause is already set.");
 
@@ -67,11 +79,12 @@ namespace Insula.Data.Orm
         /// <param name="columnValueFilters">Anonymous or typed object. Example: <c>Where(new { ItemCategoryID = "FOOD", IsAvailable = true })</c></param>
         public SqlQuery<T> Where(object columnValueFilters, bool includePropertiesHavingDefaultTypeValue = false)
         {
-            if (columnValueFilters == null)
-                throw new ArgumentNullException("columnValueFilters");
-
+            if (_customSelectStatement != null)
+                throw new InvalidOperationException("\"Where\" method cannot be used with custom select statement.");
             if (!_where.IsNullOrWhiteSpace())
                 throw new InvalidOperationException("WHERE clause is already set.");
+            if (columnValueFilters == null)
+                throw new ArgumentNullException("columnValueFilters");
 
             var columns = new List<Tuple<int, string, object>>();
 
@@ -105,6 +118,8 @@ namespace Insula.Data.Orm
 
         public SqlQuery<T> OrderBy(params string[] columns)
         {
+            if (_customSelectStatement != null)
+                throw new InvalidOperationException("\"OrderBy\" method cannot be used with custom select statement.");
             if (!_orderByColumns.IsNullOrEmpty())
                 throw new InvalidOperationException("ORDER BY clause is already set.");
 
@@ -112,9 +127,14 @@ namespace Insula.Data.Orm
             return this;
         }
 
+        #endregion
+
+
+        #region What to take from results
+
         public IEnumerable<T> GetAll()
         {
-            using (var command = _database.CreateCommand(this.ParseQuery(), _parameters))
+            using (var command = _database.CreateCommand(_customSelectStatement ?? this.ParseQuery(), _parameters))
             {
                 var entities = new List<T>();
                 var fkEntities = new Dictionary<Type, Dictionary<string, object>>();
@@ -231,6 +251,9 @@ namespace Insula.Data.Orm
             var count = (long?)_database.ExecuteScalar(this.ParseQuery(), _parameters);
             return count ?? 0;
         }
+
+        #endregion
+
 
         private string ParseQuery()
         {
