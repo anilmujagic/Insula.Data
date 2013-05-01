@@ -50,10 +50,7 @@ namespace Insula.Data.Orm
 
         internal void CloseConnection()
         {
-            if (_connection == null)
-                throw new InvalidOperationException("Connection is not initialized.");
-
-            if (_connection.State != System.Data.ConnectionState.Closed)
+            if (_connection != null && _connection.State != System.Data.ConnectionState.Closed)
                 _connection.Close();
         }
 
