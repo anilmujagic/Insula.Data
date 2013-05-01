@@ -22,6 +22,9 @@ namespace Insula.Data.Orm
             _connectionString = connectionString;
 
             this.InitializeConnection();
+
+            _tableMetadata = new Dictionary<string, TableMetadata>();
+            _materializers = new Dictionary<string, object>();
         }
 
         public DatabaseType DatabaseType { get; private set; }
@@ -162,6 +165,34 @@ namespace Insula.Data.Orm
             System.Diagnostics.Debug.WriteLine(message);
             System.Diagnostics.Debug.WriteLine(sql);
         }
+
+
+        #region Cached metadata to improve speed
+
+        private readonly Dictionary<string, TableMetadata> _tableMetadata;
+        internal TableMetadata GetTableMetadata(Type type)
+        {
+            if (!_tableMetadata.ContainsKey(type.FullName))
+                _tableMetadata.Add(type.FullName, new TableMetadata(type));
+
+            return _tableMetadata[type.FullName];
+        }
+
+        private readonly Dictionary<string, object> _materializers;
+        internal object GetMaterializer(Type type)
+        {
+            if (!_materializers.ContainsKey(type.FullName))
+            {
+                var tableMetadata = this.GetTableMetadata(type);
+                var materializerType = typeof(Materializer<>).MakeGenericType(new Type[] { type });
+                var materializer = Activator.CreateInstance(materializerType, tableMetadata);
+                _materializers.Add(type.FullName, materializer);
+            }
+
+            return _materializers[type.FullName];
+        }
+
+        #endregion
 
 
         #region IDisposable Members
