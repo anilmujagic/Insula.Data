@@ -24,7 +24,7 @@ namespace Insula.Data.Orm
             this.InitializeConnection();
         }
 
-        public readonly DatabaseType DatabaseType { get; private set; }
+        public DatabaseType DatabaseType { get; private set; }
         private readonly string _connectionString;
         private DbConnection _connection;
 

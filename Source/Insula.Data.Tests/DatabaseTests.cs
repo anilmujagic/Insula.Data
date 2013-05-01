@@ -63,7 +63,7 @@ namespace Insula.Data.Tests
 
         private Database GetDatabase()
         {
-            return new Database(ConfigurationManager.ConnectionStrings["MyAppDB"].ConnectionString);
+            return new Database(DatabaseType.SqlServer, ConfigurationManager.ConnectionStrings["MyAppDB"].ConnectionString);
         }
 
         #endregion
