@@ -11,7 +11,7 @@ namespace Insula.Data.Tests
     {
         public class CustomQueryTests
         {
-            public class TestEntity
+            public class TestEntity1
             {
                 public int AuthorID { get; set; }
                 public string Name { get; set; }
@@ -29,7 +29,7 @@ namespace Insula.Data.Tests
                 using (var db = TestHelper.GetDatabase())
                 {
                     var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Author WHERE Name LIKE 'A%'");
-                    var entities = db.Query<TestEntity>("SELECT * FROM Author WHERE Name LIKE 'A%'")
+                    var entities = db.Query<TestEntity1>("SELECT * FROM Author WHERE Name LIKE 'A%'")
                         .GetAll();
                     var nameOfFirstAuthor = entities.First().Name;
 
@@ -44,7 +44,7 @@ namespace Insula.Data.Tests
                 using (var db = TestHelper.GetDatabase())
                 {
                     var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Author WHERE Name LIKE @0", "B%");
-                    var entities = db.Query<TestEntity>("SELECT * FROM Author WHERE Name LIKE @0", "B%")
+                    var entities = db.Query<TestEntity1>("SELECT * FROM Author WHERE Name LIKE @0", "B%")
                         .GetAll();
                     var firstAuthor = entities.FirstOrDefault();
 
@@ -80,17 +80,38 @@ namespace Insula.Data.Tests
                         WHERE a.Name LIKE @0
                         ", "C%")
                         .GetAll();
-                    var firstEntry = entities.FirstOrDefault();
+                    var firstResult = entities.FirstOrDefault();
 
                     Assert.Equal(count, entities.Count());
-                    Assert.NotNull(firstEntry);
-                    Assert.NotNull(firstEntry.BookTitle);
-                    Assert.NotNull(firstEntry.AuthorName);
+                    Assert.NotNull(firstResult);
+                    Assert.NotNull(firstResult.BookTitle);
+                    Assert.NotNull(firstResult.AuthorName);
+                }
+            }
 
-                    foreach (var e in entities)
+            [Fact]
+            public void CustomQuery_WhenCallingBuilderMethods_ThrowsException()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<TestEntity1>("SELECT * FROM Author");
+
+                    Assert.Throws(typeof(InvalidOperationException), () =>
                     {
-                        Debug.WriteLine(e.BookTitle + " by " + e.AuthorName);
-                    }
+                        query.Include("Dummy");
+                    });
+                    Assert.Throws(typeof(InvalidOperationException), () =>
+                    {
+                        query.Where("Dummy");
+                    });
+                    Assert.Throws(typeof(InvalidOperationException), () =>
+                    {
+                        query.Where(new { AuthorID = 1 });
+                    });
+                    Assert.Throws(typeof(InvalidOperationException), () =>
+                    {
+                        query.OrderBy("Dummy");
+                    });
                 }
             }
         }
