@@ -53,7 +53,7 @@
     <Compile Include="DatabaseServices\TableInfo.cs" />
     <Compile Include="Orm\ColumnMetadata.cs" />
     <Compile Include="Orm\Database.cs" />
-    <Compile Include="Orm\DatabaseType.cs" />
+    <Compile Include="Orm\DatabaseEngine.cs" />
     <Compile Include="Orm\Materializer.cs" />
     <Compile Include="Orm\SqlQuery.cs" />
     <Compile Include="Orm\SqlStatementException.cs" />

@@ -11,7 +11,7 @@ namespace Insula.Data.Orm
 {
     public class Database : IDisposable
     {
-        public Database(DatabaseType databaseType, string connectionString)
+        public Database(DatabaseEngine databaseType, string connectionString)
         {
             if (!Enum.IsDefined(databaseType.GetType(), databaseType))
                 throw new ArgumentException("Unknown DatabaseType.", "databaseType");
@@ -27,7 +27,7 @@ namespace Insula.Data.Orm
             _materializers = new Dictionary<string, object>();
         }
 
-        public DatabaseType DatabaseType { get; private set; }
+        public DatabaseEngine DatabaseType { get; private set; }
         private readonly string _connectionString;
         private DbConnection _connection;
 
@@ -40,7 +40,7 @@ namespace Insula.Data.Orm
             {
                 switch (this.DatabaseType)
                 {
-                    case DatabaseType.SqlServer:
+                    case DatabaseEngine.SqlServer:
                         _connection = new SqlConnection(_connectionString);
                         break;
                 }
@@ -94,7 +94,7 @@ namespace Insula.Data.Orm
 
                     switch (this.DatabaseType)
                     {
-                        case DatabaseType.SqlServer:
+                        case DatabaseEngine.SqlServer:
                             parameter = new SqlParameter("@" + i.ToString(CultureInfo.InvariantCulture), sqlParameterValues[i]);
                             break;
                     }

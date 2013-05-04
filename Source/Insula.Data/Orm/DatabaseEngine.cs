@@ -2,7 +2,7 @@
 
 namespace Insula.Data.Orm
 {
-    public enum DatabaseType
+    public enum DatabaseEngine
     {
         SqlServer
     }
