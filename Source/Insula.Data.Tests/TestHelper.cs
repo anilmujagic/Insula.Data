@@ -11,7 +11,7 @@ namespace Insula.Data.Tests
     {
         internal static Database GetDatabase()
         {
-            return new Database(DatabaseEngine.SqlServer, ConfigurationManager.ConnectionStrings["MyAppDB"].ConnectionString);
+            return new Database(DatabaseEngine.SqlServer, ConfigurationManager.ConnectionStrings["DefaultConnectionString"].ConnectionString);
         }
     }
 }

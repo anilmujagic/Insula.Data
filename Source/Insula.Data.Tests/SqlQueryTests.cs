@@ -13,14 +13,15 @@ namespace Insula.Data.Tests
         {
             public class TestEntity1
             {
-                public int AuthorID { get; set; }
+                public string CustomerID { get; set; }
                 public string Name { get; set; }
             }
 
             public class TestEntity2
             {
-                public string BookTitle { get; set; }
-                public string AuthorName { get; set; }
+                public int OrderID { get; set; }
+                public DateTime PostingDate { get; set; }
+                public string CustomerName { get; set; }
             }
 
             [Fact]
@@ -28,13 +29,13 @@ namespace Insula.Data.Tests
             {
                 using (var db = TestHelper.GetDatabase())
                 {
-                    var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Author WHERE Name LIKE 'A%'");
-                    var entities = db.Query<TestEntity1>("SELECT * FROM Author WHERE Name LIKE 'A%'")
+                    var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Customer WHERE CustomerID LIKE '%0'");
+                    var entities = db.Query<TestEntity1>("SELECT * FROM Customer WHERE CustomerID LIKE '%0'")
                         .GetAll();
-                    var nameOfFirstAuthor = entities.First().Name;
+                    var nameFromFirstRecord = entities.First().Name;
 
                     Assert.Equal(count, entities.Count());
-                    Assert.NotNull(nameOfFirstAuthor);
+                    Assert.NotNull(nameFromFirstRecord);
                 }
             }
 
@@ -43,14 +44,14 @@ namespace Insula.Data.Tests
             {
                 using (var db = TestHelper.GetDatabase())
                 {
-                    var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Author WHERE Name LIKE @0", "B%");
-                    var entities = db.Query<TestEntity1>("SELECT * FROM Author WHERE Name LIKE @0", "B%")
+                    var count = (int)db.ExecuteScalar("SELECT COUNT(*) FROM Customer WHERE Name LIKE @0", "%1");
+                    var entities = db.Query<TestEntity1>("SELECT * FROM Customer WHERE Name LIKE @0", "%1")
                         .GetAll();
-                    var firstAuthor = entities.FirstOrDefault();
+                    var firstRecord = entities.FirstOrDefault();
 
                     Assert.Equal(count, entities.Count());
-                    Assert.NotNull(firstAuthor);
-                    Assert.NotNull(firstAuthor.Name);
+                    Assert.NotNull(firstRecord);
+                    Assert.NotNull(firstRecord.Name);
                 }
             }
 
@@ -61,31 +62,29 @@ namespace Insula.Data.Tests
                 {
                     var count = (int)db.ExecuteScalar(@"
                         SELECT COUNT(*)
-                        FROM Book AS b
-                        JOIN BookAuthor AS ba
-                            ON ba.BookID = b.BookID
-                        JOIN Author AS a
-                            ON a.AuthorID = ba.AuthorID
-                        WHERE a.Name LIKE @0
-                        ", "C%");
+                        FROM [Order] AS o
+                        JOIN [Customer] AS c
+                            ON c.CustomerID = o.CustomerID
+                        WHERE c.CustomerID LIKE @0
+                        ", "%2");
                     var entities = db.Query<TestEntity2>(@"
                         SELECT 
-                            b.Title AS BookTitle,
-                            a.Name AS AuthorName
-                        FROM Book AS b
-                        JOIN BookAuthor AS ba
-                            ON ba.BookID = b.BookID
-                        JOIN Author AS a
-                            ON a.AuthorID = ba.AuthorID
-                        WHERE a.Name LIKE @0
-                        ", "C%")
+                            o.OrderID,
+                            o.PostingDate,
+                            c.Name AS CustomerName
+                        FROM [Order] AS o
+                        JOIN [Customer] AS c
+                            ON c.CustomerID = o.CustomerID
+                        WHERE c.CustomerID LIKE @0
+                        ", "%2")
                         .GetAll();
                     var firstResult = entities.FirstOrDefault();
 
                     Assert.Equal(count, entities.Count());
                     Assert.NotNull(firstResult);
-                    Assert.NotNull(firstResult.BookTitle);
-                    Assert.NotNull(firstResult.AuthorName);
+                    Assert.NotEqual(0, firstResult.OrderID);
+                    Assert.NotEqual(DateTime.MinValue, firstResult.PostingDate);
+                    Assert.NotNull(firstResult.CustomerName);
                 }
             }
 
@@ -94,7 +93,7 @@ namespace Insula.Data.Tests
             {
                 using (var db = TestHelper.GetDatabase())
                 {
-                    var query = db.Query<TestEntity1>("SELECT * FROM Author");
+                    var query = db.Query<TestEntity1>("SELECT * FROM Customer");
 
                     Assert.Throws(typeof(InvalidOperationException), () =>
                     {
