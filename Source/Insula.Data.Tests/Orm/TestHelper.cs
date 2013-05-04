@@ -5,7 +5,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 
-namespace Insula.Data.Tests
+namespace Insula.Data.Tests.Orm
 {
     static class TestHelper
     {

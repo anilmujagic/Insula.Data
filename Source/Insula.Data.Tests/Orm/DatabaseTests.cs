@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Insula.Data.Tests
+namespace Insula.Data.Tests.Orm
 {
     public class DatabaseTests
     {
