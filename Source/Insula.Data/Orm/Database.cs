@@ -197,9 +197,9 @@ namespace Insula.Data.Orm
 
         #region Query
 
-        public SqlQuery<T> Query<T>(string selectStatement = null, params object[] parameters) where T : class, new()
+        public SqlQuery<T> Query<T>(string customSelectStatement = null, params object[] parameters) where T : class, new()
         {
-            return new SqlQuery<T>(this, selectStatement, parameters);
+            return new SqlQuery<T>(this, customSelectStatement, parameters);
         }
 
         #endregion

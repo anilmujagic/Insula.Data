@@ -10,13 +10,13 @@ namespace Insula.Data.Orm
 {
     public class SqlQuery<T> where T : class, new()
     {
-        internal SqlQuery(Database database, string selectStatement, params object[] parameters)
+        internal SqlQuery(Database database, string customSelectStatement = null, params object[] parameters)
         {
             if (database == null)
                 throw new ArgumentNullException("database");
 
             _database = database;
-            _customSelectStatement = selectStatement;
+            _customSelectStatement = customSelectStatement;
             _parameters = parameters;
 
             _tableMetadata = _database.GetTableMetadata(typeof(T));
