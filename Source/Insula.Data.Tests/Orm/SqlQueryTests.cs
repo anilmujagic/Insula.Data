@@ -451,6 +451,25 @@ namespace Insula.Data.Tests.Orm
 
                 this.DeleteTestData(testRunID);
             }
+
+            [Fact]
+            public void GetCountAndGetLongCount_IfUsedWithOrderBy_ThrowsException()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<Customer>()
+                        .OrderBy("Name");
+
+                    Assert.Throws(typeof(InvalidOperationException), () =>
+                    {
+                        query.GetCount();
+                    });
+                    Assert.Throws(typeof(InvalidOperationException), () =>
+                    {
+                        query.GetLongCount();
+                    });
+                }
+            }
         }
     }
 }

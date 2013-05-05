@@ -248,6 +248,9 @@ namespace Insula.Data.Orm
 
         public int GetCount()
         {
+            if (!_orderByColumns.IsNullOrEmpty())
+                throw new InvalidOperationException("\"GetCount\" method cannot be called if the query has ORDER BY clause.");
+
             _columnNames = "COUNT(*)";
 
             var count = (int?)_database.ExecuteScalar(this.ParseQuery(), _parameters);
@@ -256,6 +259,9 @@ namespace Insula.Data.Orm
 
         public long GetLongCount()
         {
+            if (!_orderByColumns.IsNullOrEmpty())
+                throw new InvalidOperationException("\"GetLongCount\" method cannot be called if the query has ORDER BY clause.");
+
             _columnNames = "COUNT_BIG(*)";
 
             var count = (long?)_database.ExecuteScalar(this.ParseQuery(), _parameters);
