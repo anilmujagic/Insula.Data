@@ -7,16 +7,16 @@ using System.Text;
 
 namespace Insula.Data.Tests.Models
 {
-    public class Customer
+    public class Item
     {
         [Mapped]
         [Key]
-        public string CustomerID { get; set; }
+        public string ItemID { get; set; }
 
         [Mapped]
-        public string Name { get; set; }
+        public string Description { get; set; }
 
         [Mapped]
-        public string Address { get; set; }
+        public decimal Price { get; set; }
     }
 }

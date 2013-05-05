@@ -44,19 +44,30 @@ namespace Insula.Data.Orm
 
         #region Create main SELECT statement
 
-        public SqlQuery<T> Include(string propertyName)
+        /// <summary>
+        /// Loads related foreign key entities together with the main queried entity.
+        /// </summary>
+        /// <param name="propertyNames">Names of properties representing related entities.</param>
+        /// <returns></returns>
+        public SqlQuery<T> Include(params string[] propertyNames)
         {
             if (_customSelectStatement != null)
                 throw new InvalidOperationException("\"Include\" method cannot be used with custom select statement.");
 
-            var property = typeof(T).GetProperty(propertyName);
-            if (property == null)
-                throw new ArgumentException(
-                    "Type {0} doesn't have a property named {1}".FormatString(typeof(T).Name, propertyName),
-                    "propertyName");
+            if (propertyNames.IsNullOrEmpty())
+                return this;
 
-            _joins.Add(propertyName, _database.GetTableMetadata(property.PropertyType));
-            _joinMaterializers.Add(propertyName, _database.GetMaterializer(property.PropertyType));
+            foreach (var propertyName in propertyNames)
+            {
+                var property = typeof(T).GetProperty(propertyName);
+                if (property == null)
+                    throw new ArgumentException(
+                        "Type {0} doesn't have a property named {1}".FormatString(typeof(T).Name, propertyName),
+                        "propertyName");
+    
+                _joins.Add(propertyName, _database.GetTableMetadata(property.PropertyType));
+                _joinMaterializers.Add(propertyName, _database.GetMaterializer(property.PropertyType));
+            }
 
             return this;
         }

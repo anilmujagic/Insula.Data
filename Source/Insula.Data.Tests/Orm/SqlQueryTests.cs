@@ -188,7 +188,7 @@ namespace Insula.Data.Tests.Orm
                     var results = db.Query<Customer>()
                         .Where(new { Name = name })
                         .GetAll()
-                        .ToList();  //To be able to use index
+                        .ToList();  //To be able to access by index
                     db.ExecuteNonQuery(@"DELETE Customer WHERE Name = @0", name);
 
                     Assert.False(results.IsNullOrEmpty());
@@ -217,6 +217,110 @@ namespace Insula.Data.Tests.Orm
                     var expectedOrderByClause = "ORDER BY Name, CustomerID DESC";
 
                     Assert.Contains(expectedOrderByClause, query.ToString());
+                }
+            }
+        }
+
+        public class Include
+        {
+            [Fact]
+            public void Include_ReturnsRelatedEntities()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var ids = new int[] { 0, 1, 2, 3 };
+                    var itemIDs = (ids).Select(id => "TEST-ITEM-" + id.ToString()).ToArray();
+                    var itemNames = (ids).Select(id => "TEST ITEM " + id.ToString()).ToArray();
+                    var customerIDs = (ids).Select(id => "TEST-CUST-" + id.ToString()).ToArray();
+                    var customerNames = (ids).Select(id => "TEST CUSTOMER " + id.ToString()).ToArray();
+
+                    db.ExecuteNonQuery(@"DELETE Discount");
+                    db.ExecuteNonQuery(@"DELETE Item WHERE ItemID LIKE @0", "TEST-ITEM-%");
+                    db.ExecuteNonQuery(@"DELETE Customer WHERE CustomerID LIKE @0", "TEST-CUST-%");
+
+                    for (int i = 0; i <= 3; i++)
+                    {
+                        db.ExecuteNonQuery(@"INSERT INTO Item VALUES (@0, @1, @2)", itemIDs[i], itemNames[i], i);
+                        db.ExecuteNonQuery(@"INSERT INTO Customer VALUES (@0, @1, @2)", customerIDs[i], customerNames[i], "Some street");
+                    }
+
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, CustomerID, [Percent]) VALUES (@0, @1, @2)", itemIDs[0], customerIDs[0], 7);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, CustomerID, [Percent]) VALUES (@0, @1, @2)", itemIDs[0], customerIDs[1], 7.1);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, CustomerID, [Percent]) VALUES (@0, @1, @2)", itemIDs[1], customerIDs[2], 7.2);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, CustomerID, [Percent]) VALUES (@0, @1, @2)", itemIDs[2], customerIDs[2], 7.3);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (CustomerID, [Percent]) VALUES (@0, @1)", customerIDs[3], 5);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (CustomerID, [Percent]) VALUES (@0, @1)", customerIDs[1], 5.5);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, [Percent]) VALUES (@0, @1)", itemIDs[3], 2);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount (ItemID, [Percent]) VALUES (@0, @1)", itemIDs[1], 2.5);
+                    db.ExecuteNonQuery(@"INSERT INTO Discount ([Percent]) VALUES (@0)", 9);
+
+                    var query = db.Query<Discount>()
+                        .Include("Item", "Customer")
+                        .OrderBy("DiscountID");
+                    var results = query
+                        .GetAll()
+                        .ToList();  //To be able to access by index
+
+                    Assert.False(results.IsNullOrEmpty());
+                    Assert.Equal(9, results.Count());
+
+                    // Make sure properties are loaded correctly
+                    Assert.NotNull(results[0].Item);
+                    Assert.Equal(itemIDs[0], results[0].Item.ItemID);
+                    Assert.Equal(itemNames[0], results[0].Item.Description);
+                    Assert.NotNull(results[0].Customer);
+                    Assert.Equal(customerIDs[0], results[0].Customer.CustomerID);
+                    Assert.Equal(customerNames[0], results[0].Customer.Name);
+
+                    Assert.NotNull(results[1].Item);
+                    Assert.Equal(itemIDs[0], results[1].Item.ItemID);
+                    Assert.Equal(itemNames[0], results[1].Item.Description);
+                    Assert.NotNull(results[1].Customer);
+                    Assert.Equal(customerIDs[1], results[1].Customer.CustomerID);
+                    Assert.Equal(customerNames[1], results[1].Customer.Name);
+
+                    Assert.NotNull(results[2].Item);
+                    Assert.Equal(itemIDs[1], results[2].Item.ItemID);
+                    Assert.Equal(itemNames[1], results[2].Item.Description);
+                    Assert.NotNull(results[2].Customer);
+                    Assert.Equal(customerIDs[2], results[2].Customer.CustomerID);
+                    Assert.Equal(customerNames[2], results[2].Customer.Name);
+
+                    Assert.NotNull(results[3].Item);
+                    Assert.Equal(itemIDs[2], results[3].Item.ItemID);
+                    Assert.Equal(itemNames[2], results[3].Item.Description);
+                    Assert.NotNull(results[3].Customer);
+                    Assert.Equal(customerIDs[2], results[3].Customer.CustomerID);
+                    Assert.Equal(customerNames[2], results[3].Customer.Name);
+
+                    Assert.Null(results[4].Item);
+                    Assert.NotNull(results[4].Customer);
+                    Assert.Equal(customerIDs[3], results[4].Customer.CustomerID);
+                    Assert.Equal(customerNames[3], results[4].Customer.Name);
+
+                    Assert.Null(results[5].Item);
+                    Assert.NotNull(results[5].Customer);
+                    Assert.Equal(customerIDs[1], results[5].Customer.CustomerID);
+                    Assert.Equal(customerNames[1], results[5].Customer.Name);
+
+                    Assert.NotNull(results[6].Item);
+                    Assert.Equal(itemIDs[3], results[6].Item.ItemID);
+                    Assert.Equal(itemNames[3], results[6].Item.Description);
+                    Assert.Null(results[6].Customer);
+
+                    Assert.NotNull(results[7].Item);
+                    Assert.Equal(itemIDs[1], results[7].Item.ItemID);
+                    Assert.Equal(itemNames[1], results[7].Item.Description);
+                    Assert.Null(results[7].Customer);
+
+                    Assert.Null(results[8].Item);
+                    Assert.Null(results[8].Customer);
+
+                    // Make sure object is not created twice
+                    Assert.Same(results[0].Item, results[1].Item);
+                    Assert.Same(results[2].Item, results[7].Item);
+                    Assert.Same(results[2].Customer, results[3].Customer);
+                    Assert.Same(results[1].Customer, results[5].Customer);
                 }
             }
         }

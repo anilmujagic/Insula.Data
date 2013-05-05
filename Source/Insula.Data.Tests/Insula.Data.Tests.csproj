@@ -37,6 +37,7 @@
       <HintPath>..\packages\Insula.Common.1.0.3\lib\portable-win+net40+sl40+wp\Insula.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +54,8 @@
       <Link>Properties\MasterAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Models\Customer.cs" />
+    <Compile Include="Models\Discount.cs" />
+    <Compile Include="Models\Item.cs" />
     <Compile Include="Orm\DatabaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Orm\SqlQueryTests.cs" />
@@ -63,6 +66,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Insula.DataAnnotations\Insula.DataAnnotations.csproj">
+      <Project>{3f1786e7-5b41-4209-b2e3-0db644e87980}</Project>
+      <Name>Insula.DataAnnotations</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Insula.Data\Insula.Data.csproj">
       <Project>{b4b4346f-2114-4bbc-9d6b-d102d4572c70}</Project>
       <Name>Insula.Data</Name>
