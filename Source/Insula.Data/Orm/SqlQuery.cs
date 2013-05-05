@@ -77,7 +77,7 @@ namespace Insula.Data.Orm
         /// Creates a SQL WHERE clause by extracting names and values from properties of passed object.
         /// </summary>
         /// <param name="columnValueFilters">Anonymous or typed object. Example: <c>Where(new { ItemCategoryID = "FOOD", IsAvailable = true })</c></param>
-        public SqlQuery<T> Where(object columnValueFilters, bool includePropertiesHavingDefaultTypeValue = false)
+        public SqlQuery<T> Where(object columnValueFilters)
         {
             if (_customSelectStatement != null)
                 throw new InvalidOperationException("\"Where\" method cannot be used with custom select statement.");
@@ -86,8 +86,7 @@ namespace Insula.Data.Orm
             if (columnValueFilters == null)
                 throw new ArgumentNullException("columnValueFilters");
 
-            var columns = new List<Tuple<int, string, object>>();
-
+            var columns = new List<Tuple<int?, string, object>>();
             var properties = columnValueFilters.GetType().GetProperties();
 
             if (properties.Length > 0)
@@ -95,20 +94,20 @@ namespace Insula.Data.Orm
                 var position = 0;
                 foreach (var p in properties)
                 {
-                    var type = p.PropertyType;
-                    var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
                     var value = p.GetValue(columnValueFilters, null);
-                    if (!(value.Equals(defaultValue) && !includePropertiesHavingDefaultTypeValue))
-                    {
-                        columns.Add(new Tuple<int, string, object>(position, p.Name, value));
-                        position++;
-                    }
+                    if (value == null)
+                        columns.Add(new Tuple<int?, string, object>(null, p.Name, value));
+                    else
+                        columns.Add(new Tuple<int?, string, object>(position++, p.Name, value));
                 }
 
                 _where = string.Join(" AND ", columns
-                    .Select(c => string.Format(CultureInfo.InvariantCulture, "[{0}] = @{1}", c.Item2, c.Item1)));
+                    .Select(c => c.Item1.HasValue
+                        ? "[{0}] = @{1}".FormatInvariant(c.Item2, c.Item1)
+                        : "[{0}] IS NULL".FormatInvariant(c.Item2)));
 
                 _parameters = columns
+                    .Where(c => c.Item1.HasValue)
                     .Select(c => c.Item3)
                     .ToArray();
             }

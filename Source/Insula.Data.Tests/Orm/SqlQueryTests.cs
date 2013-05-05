@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Insula.Common;
+using Insula.Data.Tests.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace Insula.Data.Tests.Orm
 {
     public class SqlQueryTests
     {
-        public class CustomQueryTests
+        public class CustomQuery
         {
             public class TestEntity1
             {
@@ -111,6 +113,110 @@ namespace Insula.Data.Tests.Orm
                     {
                         query.OrderBy("Dummy");
                     });
+                }
+            }
+        }
+
+        public class Where
+        {
+            [Fact]
+            public void Where_OnObjectWithoutProperties_DoesNotCreateWhereClause()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<Customer>()
+                        .Where(new { })
+                        .ToString();
+
+                    Assert.DoesNotContain("WHERE", query);
+                }
+            }
+
+            [Fact]
+            public void Where_OnAnonymousObject_CreatesWhereClauseForEachProperty()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<Customer>()
+                        .Where(new
+                        {
+                            FirstName = "Anil",
+                            LastName = "Mujagic",
+                            Email = (string)null
+                        })
+                        .ToString();
+
+                    Assert.Contains("WHERE", query);
+                    Assert.Contains("[FirstName] = @0", query);
+                    Assert.Contains("[LastName] = @1", query);
+                    Assert.Contains("[Email] IS NULL", query);
+                }
+            }
+
+            [Fact]
+            public void Where_OnTypedObject_CreatesWhereClauseForEachProperty()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<Customer>()
+                        .Where(new Customer
+                        {
+                            Name = "Anil Mujagic"
+                        })
+                        .ToString();
+
+                    Assert.Contains("WHERE", query);
+                    Assert.Contains("[CustomerID] IS NULL", query);
+                    Assert.Contains("[Name] = @0", query);
+                    Assert.Contains("[Address] IS NULL", query);
+                }
+            }
+
+            [Fact]
+            public void Where_ReturnsCorrectResults()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var id1 = "TEST-1";
+                    var id2 = "TEST-2";
+                    var id3 = "TEST-3";
+                    var name = Guid.NewGuid().ToString();
+    
+                    db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id1, name);
+                    db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id2, name);
+                    db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id3, name);
+                    var results = db.Query<Customer>()
+                        .Where(new { Name = name })
+                        .GetAll()
+                        .ToList();  //To be able to use index
+                    db.ExecuteNonQuery(@"DELETE Customer WHERE Name = @0", name);
+
+                    Assert.False(results.IsNullOrEmpty());
+                    Assert.Equal(3, results.Count());
+                    Assert.Equal(id1, results[0].CustomerID);
+                    Assert.Equal(id2, results[1].CustomerID);
+                    Assert.Equal(id3, results[2].CustomerID);
+                    for (int i = 0; i < results.Count; i++)
+                    {
+                        Assert.Equal(name, results[i].Name);
+                    }
+                }
+            }
+        }
+
+        public class OrderBy
+        {
+            [Fact]
+            public void OrderBy_IncludesAllPassedColumnsInSqlStatement()
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var query = db.Query<Customer>()
+                        .OrderBy("Name", "CustomerID DESC");
+
+                    var expectedOrderByClause = "ORDER BY Name, CustomerID DESC";
+
+                    Assert.Contains(expectedOrderByClause, query.ToString());
                 }
             }
         }
