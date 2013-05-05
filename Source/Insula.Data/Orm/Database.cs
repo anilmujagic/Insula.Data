@@ -90,20 +90,26 @@ namespace Insula.Data.Orm
             {
                 for (int i = 0; i < sqlParameterValues.Length; i++)
                 {
-                    DbParameter parameter = null;
-
-                    switch (this.DatabaseType)
-                    {
-                        case DatabaseEngine.SqlServer:
-                            parameter = new SqlParameter("@" + i.ToString(CultureInfo.InvariantCulture), sqlParameterValues[i]);
-                            break;
-                    }
-
+                    var parameter = this.CreateParameter(i.ToString(CultureInfo.InvariantCulture), sqlParameterValues[i]);
                     command.Parameters.Add(parameter);
                 }
             }
 
             return command;
+        }
+
+        internal DbParameter CreateParameter(string name, object value)
+        {
+            DbParameter parameter = null;
+
+            switch (this.DatabaseType)
+            {
+                case DatabaseEngine.SqlServer:
+                    parameter = new SqlParameter("@" + name, value);
+                    break;
+            }
+
+            return parameter;
         }
 
         public object ExecuteScalar(string sql, params object[] parameters)

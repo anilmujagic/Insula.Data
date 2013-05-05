@@ -1,6 +1,7 @@
 ﻿using Insula.DataAnnotations.Schema;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 
@@ -9,6 +10,8 @@ namespace Insula.Data.Tests.Models
     public class Discount
     {
         [Mapped]
+        [Key]
+        [Identity]
         public int DiscountID { get; set; }
 
         [Mapped]
