@@ -6,7 +6,6 @@ using System.Text;
 using System.Reflection;
 using System.Globalization;
 using System.Data.Common;
-using System.Data.SqlClient;
 
 namespace Insula.Data.Orm
 {
