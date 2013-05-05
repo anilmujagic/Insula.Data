@@ -91,7 +91,7 @@ namespace Insula.Data.Tests.Orm
             }
 
             [Fact]
-            public void CustomQuery_WhenCallingBuilderMethods_ThrowsException()
+            public void CustomQuery_CallToBuilderMethods_ThrowsException()
             {
                 using (var db = TestHelper.GetDatabase())
                 {
@@ -453,7 +453,7 @@ namespace Insula.Data.Tests.Orm
             }
 
             [Fact]
-            public void GetCountAndGetLongCount_IfUsedWithOrderBy_ThrowsException()
+            public void GetCountAndGetLongCount_UsedWithOrderBy_ThrowsException()
             {
                 using (var db = TestHelper.GetDatabase())
                 {
