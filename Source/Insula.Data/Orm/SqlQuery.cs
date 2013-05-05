@@ -274,7 +274,7 @@ namespace Insula.Data.Orm
             {
                 if (_columnNames.IsNullOrWhiteSpace())
                     _columnNames = string.Join(", ", _tableMetadata.SelectColumns
-                        .Select(c => string.Format(CultureInfo.InvariantCulture, "[{0}]", c.Name))
+                        .Select(c => "[{0}]".FormatString(c.Name))
                         .ToArray());
 
                 orderByColumns = _orderByColumns.IsNullOrEmpty()
@@ -286,7 +286,7 @@ namespace Insula.Data.Orm
                 if (_columnNames.IsNullOrWhiteSpace())
                 {
                     _columnNames = string.Join(",\n", _tableMetadata.SelectColumns
-                        .Select(c => string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}] AS [{0}.{1}]", _tableMetadata.Name, c.Name))
+                        .Select(c => "[{0}].[{1}] AS [{0}.{1}]".FormatString(_tableMetadata.Name, c.Name))
                         .ToArray());
 
                     foreach (var j in _joins)
@@ -295,14 +295,14 @@ namespace Insula.Data.Orm
                             _columnNames += ",\n";
 
                         _columnNames += string.Join(",\n", j.Value.SelectColumns
-                            .Select(c => string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}] AS [{0}.{1}]", j.Key, c.Name))
+                            .Select(c => "[{0}].[{1}] AS [{0}.{1}]".FormatString(j.Key, c.Name))
                             .ToArray());
                     }
                 }
 
                 orderByColumns = _orderByColumns.IsNullOrEmpty()
                     ? string.Empty
-                    : string.Join(", ", _orderByColumns.Select(c => string.Format(CultureInfo.InvariantCulture, "[{0}].{1}", _tableMetadata.Name, c.Trim())));
+                    : string.Join(", ", _orderByColumns.Select(c => "[{0}].{1}".FormatString(_tableMetadata.Name, c.Trim())));
 
                 foreach (var j in _joins)
                 {
@@ -314,10 +314,10 @@ namespace Insula.Data.Orm
 
                         //This assumes convention where FK column names are the same as PK column names.
                         //TODO: Implement ForeignKeyAttribute and use its column names to make the "ON" clause for more complex scenarios.
-                        onClause += string.Format(CultureInfo.InvariantCulture, "([{0}].[{2}] = [{1}].[{2}])", j.Key, _tableMetadata.Name, c.Name);
+                        onClause += "([{0}].[{2}] = [{1}].[{2}])".FormatString(j.Key, _tableMetadata.Name, c.Name);
                     }
 
-                    joins.AppendLine(string.Format(CultureInfo.InvariantCulture, "LEFT OUTER JOIN [{0}] AS [{1}] ON {2}", j.Value.Name, j.Key, onClause));
+                    joins.AppendLine("LEFT OUTER JOIN [{0}] AS [{1}] ON {2}".FormatString(j.Value.Name, j.Key, onClause));
                 }
             }
 
@@ -331,7 +331,7 @@ namespace Insula.Data.Orm
                     sb.AppendFormat("TOP {0}\n", _take);
 
                 sb.AppendLine(_columnNames);
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "FROM [{0}]", _tableMetadata.Name));
+                sb.AppendLine("FROM [{0}]".FormatString(_tableMetadata.Name));
 
                 sb.Append(joins.ToString());
 
