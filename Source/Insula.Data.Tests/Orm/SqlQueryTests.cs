@@ -181,7 +181,7 @@ namespace Insula.Data.Tests.Orm
                     var id2 = "TEST-2";
                     var id3 = "TEST-3";
                     var name = Guid.NewGuid().ToString();
-    
+
                     db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id1, name);
                     db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id2, name);
                     db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)", id3, name);
@@ -322,6 +322,134 @@ namespace Insula.Data.Tests.Orm
                     Assert.Same(results[2].Customer, results[3].Customer);
                     Assert.Same(results[1].Customer, results[5].Customer);
                 }
+            }
+        }
+
+        public class ResultLimitMethods
+        {
+            private void PrepareTestData(string testRunID)
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var name = testRunID;
+                    var id = name.Substring(0, 15);
+
+                    for (int i = 1; i <= 9; i++)
+                    {
+                        db.ExecuteNonQuery(@"INSERT INTO Customer (CustomerID, Name) VALUES (@0, @1)",
+                            id + "_" + i.ToString(),
+                            name + "_" + i.ToString());
+                    }
+                }
+            }
+
+            private void DeleteTestData(string testRunID)
+            {
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var name = testRunID.ToString();
+                    var id = name.Substring(0, 15);
+
+                    for (int i = 1; i <= 9; i++)
+                    {
+                        db.ExecuteNonQuery(@"DELETE FROM Customer WHERE CustomerID LIKE @0", id + "%");
+                    }
+                }
+            }
+
+            [Fact]
+            public void GetSubset_ReturnsCorrectResult()
+            {
+                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var shortTestRunID = testRunID.Substring(0, 15);
+
+                this.PrepareTestData(testRunID);
+
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var skip = 3;
+                    var take = 4;
+
+                    var results = db.Query<Customer>()
+                        .Where("CustomerID LIKE @0", shortTestRunID + "%")
+                        .OrderBy("CustomerID")
+                        .GetSubset(skip, take)
+                        .ToList();
+
+                    for (int i = 0; i < take; i++)
+                    {
+                        var id = "{0}_{1}".FormatInvariant(shortTestRunID, i + 1 + skip);
+                        Assert.Equal(id, results[i].CustomerID);
+                    }
+                }
+
+                this.DeleteTestData(testRunID);
+            }
+
+            [Fact]
+            public void GetTop_ReturnsCorrectResult()
+            {
+                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var shortTestRunID = testRunID.Substring(0, 15);
+
+                this.PrepareTestData(testRunID);
+
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var top = 6;
+
+                    var results = db.Query<Customer>()
+                        .Where("CustomerID LIKE @0", shortTestRunID + "%")
+                        .OrderBy("CustomerID")
+                        .GetTop(top)
+                        .ToList();
+
+                    for (int i = 0; i < top; i++)
+                    {
+                        var id = "{0}_{1}".FormatInvariant(shortTestRunID, i + 1);
+                        Assert.Equal(id, results[i].CustomerID);
+                    }
+                }
+
+                this.DeleteTestData(testRunID);
+            }
+
+            [Fact]
+            public void GetCount_ReturnsCorrectResult()
+            {
+                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+
+                this.PrepareTestData(testRunID);
+
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var count = db.Query<Customer>()
+                        .Where("Name LIKE @0", testRunID + "%")
+                        .GetCount();
+
+                    Assert.Equal(9, count);
+                }
+
+                this.DeleteTestData(testRunID);
+            }
+
+            [Fact]
+            public void GetLongCount_ReturnsCorrectResult()
+            {
+                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+
+                this.PrepareTestData(testRunID);
+
+                using (var db = TestHelper.GetDatabase())
+                {
+                    var count = db.Query<Customer>()
+                        .Where("Name LIKE @0", testRunID + "%")
+                        .GetLongCount();
+
+                    Assert.Equal(9, count);
+                }
+
+                this.DeleteTestData(testRunID);
             }
         }
     }

@@ -140,7 +140,7 @@ namespace Insula.Data.Orm
         #endregion
 
 
-        #region What to take from results
+        #region Limit results
 
         public IEnumerable<T> GetAll()
         {
