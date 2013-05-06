@@ -1,0 +1,1 @@
+nuget pack ..\Source\Insula.Data\Insula.Data.csproj -Symbols -Prop Configuration=Release
