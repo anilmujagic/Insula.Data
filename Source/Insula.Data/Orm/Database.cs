@@ -211,6 +211,16 @@ namespace Insula.Data.Orm
         #endregion
 
 
+        #region Repository
+
+        public Repository<T> Repository<T>() where T : class, new()
+        {
+            return new Repository<T>(this);
+        }
+
+        #endregion
+
+
         #region IDisposable Members
 
         public void Dispose()

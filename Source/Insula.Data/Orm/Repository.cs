@@ -11,7 +11,7 @@ namespace Insula.Data.Orm
 {
     public class Repository<T> where T : class, new()
     {
-        public Repository(Database database)
+        internal Repository(Database database)
         {
             _database = database;
             _tableMetadata = _database.GetTableMetadata(typeof(T));

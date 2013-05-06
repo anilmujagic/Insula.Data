@@ -16,7 +16,7 @@ namespace Insula.Data.Tests.Orm
         {
             using (var db = TestHelper.GetDatabase())
             {
-                var repo = new Repository<Discount>(db);
+                var repo = db.Repository<Discount>();
 
                 db.ExecuteNonQuery("DELETE FROM Discount");
                 var qEmpty = repo.Query().GetAll();
