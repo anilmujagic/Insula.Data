@@ -360,7 +360,7 @@ namespace Insula.Data.Tests.Orm
             [Fact]
             public void GetSubset_ReturnsCorrectResult()
             {
-                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var testRunID = Guid.NewGuid().ToString("N");
                 var shortTestRunID = testRunID.Substring(0, 15);
 
                 this.PrepareTestData(testRunID);
@@ -389,7 +389,7 @@ namespace Insula.Data.Tests.Orm
             [Fact]
             public void GetTop_ReturnsCorrectResult()
             {
-                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var testRunID = Guid.NewGuid().ToString("N");
                 var shortTestRunID = testRunID.Substring(0, 15);
 
                 this.PrepareTestData(testRunID);
@@ -417,7 +417,7 @@ namespace Insula.Data.Tests.Orm
             [Fact]
             public void GetCount_ReturnsCorrectResult()
             {
-                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var testRunID = Guid.NewGuid().ToString("N");
 
                 this.PrepareTestData(testRunID);
 
@@ -436,7 +436,7 @@ namespace Insula.Data.Tests.Orm
             [Fact]
             public void GetLongCount_ReturnsCorrectResult()
             {
-                var testRunID = Guid.NewGuid().ToString().Replace("-", "");
+                var testRunID = Guid.NewGuid().ToString("N");
 
                 this.PrepareTestData(testRunID);
 
