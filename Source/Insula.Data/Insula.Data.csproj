@@ -41,6 +41,10 @@
     <Reference Include="Insula.Common">
       <HintPath>..\packages\Insula.Common.1.0.3\lib\portable-win+net40+sl40+wp\Insula.Common.dll</HintPath>
     </Reference>
+    <Reference Include="Insula.DataAnnotations, Version=1.0.0.0, Culture=neutral, PublicKeyToken=00dbf8d5f8f890e5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Insula.DataAnnotations.1.0.0\lib\portable-win+net40+sl40+wp\Insula.DataAnnotations.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -66,12 +70,6 @@
     <Compile Include="Orm\SqlStatementException.cs" />
     <Compile Include="Orm\TableMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Insula.DataAnnotations\Insula.DataAnnotations.csproj">
-      <Project>{3f1786e7-5b41-4209-b2e3-0db644e87980}</Project>
-      <Name>Insula.DataAnnotations</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Insula.Data.snk" />
