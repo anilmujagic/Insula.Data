@@ -10,7 +10,7 @@ namespace Insula.Data.Orm
 {
     public class SqlQuery<T> where T : class, new()
     {
-        public SqlQuery(Database database, string customSelectStatement = null, params object[] parameters)
+        public SqlQuery(DatabaseContext database, string customSelectStatement = null, params object[] parameters)
         {
             if (database == null)
                 throw new ArgumentNullException("database");
@@ -26,7 +26,7 @@ namespace Insula.Data.Orm
             _joinMaterializers = new Dictionary<string, object>();
         }
 
-        private readonly Database _database;
+        private readonly DatabaseContext _database;
         private readonly TableMetadata _tableMetadata;
         private readonly Materializer<T> _materializer;
         private readonly Dictionary<string, TableMetadata> _joins;

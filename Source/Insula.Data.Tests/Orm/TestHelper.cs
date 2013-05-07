@@ -9,9 +9,9 @@ namespace Insula.Data.Tests.Orm
 {
     static class TestHelper
     {
-        internal static Database GetDatabase()
+        internal static DatabaseContext GetDatabase()
         {
-            return new Database(DatabaseEngine.SqlServer, ConfigurationManager.ConnectionStrings["DefaultConnectionString"].ConnectionString);
+            return new DatabaseContext(DatabaseEngine.SqlServer, ConfigurationManager.ConnectionStrings["DefaultConnectionString"].ConnectionString);
         }
     }
 }

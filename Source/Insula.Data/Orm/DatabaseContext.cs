@@ -9,9 +9,9 @@ using System.Data.SqlClient;
 
 namespace Insula.Data.Orm
 {
-    public class Database : IDisposable
+    public class DatabaseContext : IDisposable
     {
-        public Database(DatabaseEngine databaseType, string connectionString)
+        public DatabaseContext(DatabaseEngine databaseType, string connectionString)
         {
             if (!Enum.IsDefined(databaseType.GetType(), databaseType))
                 throw new ArgumentException("Unknown DatabaseType.", "databaseType");

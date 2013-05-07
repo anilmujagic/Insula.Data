@@ -11,13 +11,13 @@ namespace Insula.Data.Orm
 {
     public class Repository<T> where T : class, new()
     {
-        public Repository(Database database)
+        public Repository(DatabaseContext database)
         {
             _database = database;
             _tableMetadata = _database.GetTableMetadata(typeof(T));
         }
 
-        private readonly Database _database;
+        private readonly DatabaseContext _database;
         private readonly TableMetadata _tableMetadata;
 
 
